@@ -1,11 +1,12 @@
 OBJS := parser.o main.o redsocks.o log.o direct.o ipcache.o autoproxy.o encrypt.o shadowsocks.o http-connect.o \
-        socks4.o socks5.o http-relay.o base.o base64.o md5.o http-auth.o utils.o redudp.o socks5-udp.o shadowsocks-udp.o \
+	socks4.o socks5.o http-relay.o base.o base64.o md5.o http-auth.o utils.o redudp.o socks5-udp.o shadowsocks-udp.o \
         tcpdns.o gen/version.o
 SRCS := $(OBJS:.o=.c)
 CONF := config.h
 DEPS := .depend
 OUT := redsocks2
 VERSION := 0.60
+TARGET_SYSTEM := ""
 
 LIBS := -levent
 CFLAGS +=-fPIC -O3
@@ -21,6 +22,13 @@ override CFLAGS += -DUSE_CRYPTO_OPENSSL
 $(info Compile with OpenSSL by default. To compile with PolarSSL, run 'make USE_CRYPTO_POLARSSL=true' instead.)
 endif
 
+ifdef USE_TARGET_SYSTEM
+override TARGET_SYSTEM = $(USE_TARGET_SYSTEM)
+else
+override TARGET_SYSTEM = `uname`
+endif
+
+
 all: $(OUT)
 
 .PHONY: all clean distclean
@@ -29,7 +37,7 @@ tags: *.c *.h
 	ctags -R
 
 $(CONF):
-	@case `uname` in \
+	@case $(TARGET_SYSTEM) in \
 	Linux*) \
 		echo "#define USE_IPTABLES" >$(CONF) \
 		;; \
